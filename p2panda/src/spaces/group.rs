@@ -64,6 +64,7 @@ impl Group {
         }
     }
 
+    // TODO: Document in what case it is okay to share the ActorId publicly
     pub fn id(&self) -> ActorId {
         self.inner.id()
     }
