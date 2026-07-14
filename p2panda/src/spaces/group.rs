@@ -20,6 +20,7 @@ use crate::spaces::GroupActor;
 use crate::spaces::types::{InnerGroup, InnerGroupError, NoBody, SpacesManagerError};
 use crate::streams::{ExternalStreamFuture, ImportError, StreamPublisher, StreamSubscription};
 
+// TODO: Document how publishing messages to a group works
 #[derive(Debug)]
 pub struct Group {
     inner: InnerGroup,
