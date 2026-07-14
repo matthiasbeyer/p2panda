@@ -11,8 +11,8 @@ use p2panda_core::VerifyingKey;
 use p2panda_spaces::{ActorId, GroupContext, MemberId};
 use thiserror::Error;
 use tokio::sync::{broadcast, oneshot};
-use tokio::task::AbortHandle;
 use tokio_stream::wrappers::BroadcastStream;
+use tokio_util::task::AbortOnDropHandle;
 
 use crate::node::CreateStreamError;
 use crate::processor::ProcessorError;
@@ -25,13 +25,7 @@ pub struct Group {
     inner: InnerGroup,
     tx: StreamPublisher<NoBody>,
     event_stream_rx: RefCell<broadcast::Receiver<GroupEvent>>,
-    event_stream_handle: AbortHandle,
-}
-
-impl Drop for Group {
-    fn drop(&mut self) {
-        self.event_stream_handle.abort();
-    }
+    _event_stream_handle: AbortOnDropHandle<()>,
 }
 
 impl Group {
@@ -65,7 +59,7 @@ impl Group {
             inner,
             tx,
             event_stream_rx: RefCell::new(event_stream_rx),
-            event_stream_handle: event_stream_handle.abort_handle(),
+            _event_stream_handle: AbortOnDropHandle::new(event_stream_handle),
         }
     }
 
