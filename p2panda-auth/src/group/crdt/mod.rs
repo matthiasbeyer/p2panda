@@ -1859,6 +1859,49 @@ pub(crate) mod tests {
     }
 
     #[test]
+    fn group_as_group_manager() {
+        let y = TestGroupState::new();
+
+        // Create group G1 with ALICE as manager
+        let op1 = create_group(
+            ALICE,                                                    // alice does
+            0,                                                        // as the first operation
+            G1,                                                       // create group G1
+            vec![(GroupMember::Individual(ALICE), Access::manage())], // with Alice as manager
+            vec![],
+        );
+        let y_i = TestGroup::process(y, &op1).unwrap();
+
+        // Create group G2 with G1 as manager
+        let op2 = create_group(
+            ALICE, // alice does
+            1,     // as second operation
+            G2,    // create group G2
+            vec![
+                (GroupMember::Group(G1), Access::manage()), // with G1 as manager
+            ],
+            vec![op1.id()],
+        );
+        let y_ii = TestGroup::process(y_i, &op2).unwrap();
+
+        // Attempt to add BOB as a member of G2
+        let op3 = add_member(
+            ALICE,                        // alice does
+            2,                            // as 3rd operation
+            G2,                           // on G2
+            GroupMember::Individual(BOB), // add bob
+            Access::write(),              // with write permissions
+            vec![op2.id()],
+        );
+
+        let result = TestGroup::process(dbg!(y_ii), &op3);
+        assert!(
+            result.is_ok(),
+            "Having a group as a manager of a group did not work: {result:?}"
+        );
+    }
+
+    #[test]
     fn serde_to_from_bytes() {
         let y = TestGroupState::new();
         let op1 = create_group(
