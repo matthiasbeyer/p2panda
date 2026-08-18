@@ -95,17 +95,19 @@ macro_rules! p2panda_test {
         )
         $body:block
     ) => {
-        #[test]
-        $( #[$attr] )*
-        fn $name() {
-            $crate::test_utils::setup_tracing();
+        $crate::test_utils::p2panda_test!(@function
+            $( #[$attr] )*
+            $name
+            (
+                $( $generator_variable : $generator_type ),*
+            )
 
-            $(
-                let $generator_variable = <$generator_type as $crate::test_utils::Generatable>::generate();
-            )*
+            {
+                $crate::test_utils::setup_tracing();
 
-            $body
-        }
+                $body
+            }
+        );
     };
 
     // Check the return value of the body
@@ -115,6 +117,25 @@ macro_rules! p2panda_test {
 
         if let Err(error) = ret {
             panic!("The test failed: {error:#?}");
+        }
+    };
+
+    (@function
+        $( #[$attr:meta] )*
+        $name:ident
+        (
+                $( $generator_variable:ident : $generator_type:ty ),* $(,)?
+        )
+        $body:block
+    ) => {
+        #[test]
+        $( #[$attr] )*
+        fn $name() {
+            $(
+                let $generator_variable = <$generator_type as $crate::test_utils::Generatable>::generate();
+            )*
+
+            $body
         }
     }
 }
