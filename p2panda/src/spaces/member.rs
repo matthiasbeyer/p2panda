@@ -439,8 +439,7 @@ impl ProcessorHook<Event> for MemberAssociationHook {
 mod tests {
     use std::time::Duration;
 
-    use p2panda_core::test_utils::setup_logging;
-    use p2panda_core::{Topic, VerifyingKey};
+    use p2panda_core::{Topic, VerifyingKey, p2panda_test, test_utils::apply};
     use p2panda_spaces::Config;
     use p2panda_store::SqliteStore;
     use p2panda_store::logs::LogStore;
@@ -467,10 +466,8 @@ mod tests {
         result.map(|(op_count, _)| op_count).unwrap_or_default()
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn ensure_key_bundle_after_spawn() {
-        setup_logging();
-
         let credentials = Credentials::generate();
         let store = SqliteStore::temporary().await;
 
@@ -499,10 +496,8 @@ mod tests {
         assert_eq!(get_op_count(&store, credentials.verifying_key()).await, 1);
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn inform_active_spaces_about_new_key_bundles() {
-        setup_logging();
-
         let credentials = Credentials::generate();
         let store = SqliteStore::temporary().await;
 

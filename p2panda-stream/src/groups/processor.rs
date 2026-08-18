@@ -196,9 +196,11 @@ mod tests {
 
     use p2panda_auth::group::{GroupAction, GroupCrdtState, GroupMember};
     use p2panda_auth::{Access, GroupsExtensionArgs};
-    use p2panda_core::test_utils::{TestLog, setup_logging};
+    use p2panda_core::test_utils::{TestLog, apply};
     use p2panda_core::traits::Digest;
-    use p2panda_core::{Extension, Hash, Header, Operation, SigningKey, Topic, VerifyingKey};
+    use p2panda_core::{
+        Extension, Hash, Header, Operation, SigningKey, Topic, VerifyingKey, p2panda_test,
+    };
     use p2panda_store::groups::GroupsStore;
     use p2panda_store::{SqliteStore, Transaction};
     use serde::{Deserialize, Serialize};
@@ -311,10 +313,8 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn basic_processing() {
-        setup_logging();
-
         let topic = Topic::random();
 
         let state_id = Hash::digest(b"default");
@@ -378,9 +378,8 @@ mod tests {
         assert!(members.contains(&(bobby, Access::manage())));
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn ooo_operations() {
-        setup_logging();
         let topic = Topic::random();
 
         let state_id = Hash::digest(b"default");
@@ -502,7 +501,7 @@ mod tests {
         assert!(!members.contains(&(alice, Access::manage())));
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn device_groups_single_context() {
         let topic = Topic::random();
 

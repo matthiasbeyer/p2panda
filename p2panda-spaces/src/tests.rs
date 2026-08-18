@@ -8,7 +8,8 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use p2panda_auth::Access;
 use p2panda_auth::group::GroupMember;
-use p2panda_core::test_utils::setup_logging;
+use p2panda_core::p2panda_test;
+use p2panda_core::test_utils::apply;
 use p2panda_core::traits::Digest;
 use p2panda_encryption::Rng;
 use p2panda_encryption::crypto::x25519::SecretKey;
@@ -24,7 +25,7 @@ use crate::space::{Space, SpaceError};
 use crate::test_utils::{TestPeer, TestSpaceError};
 use crate::types::AuthGroupAction;
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn create_space() {
     let alice = TestPeer::new(0).await;
     let manager = alice.manager.clone();
@@ -106,10 +107,8 @@ async fn create_space() {
     assert_eq!(vec![message_02.hash()], y.orderer.heads());
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn send_and_receive() {
-    setup_logging();
-
     let alice = TestPeer::new(0).await;
     let bob = TestPeer::new(1).await;
 
@@ -182,7 +181,7 @@ async fn send_and_receive() {
     assert_eq!(data, b"Hello, Alice!");
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn add_member_to_space() {
     let alice = TestPeer::new(0).await;
     let bob = <TestPeer>::new(1).await;
@@ -290,7 +289,7 @@ async fn add_member_to_space() {
     );
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn register_key_bundles_after_space_creation() {
     let alice = TestPeer::new(0).await;
     let bob = <TestPeer>::new(1).await;
@@ -321,7 +320,7 @@ async fn register_key_bundles_after_space_creation() {
     assert!(result.is_ok());
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn send_and_receive_after_add() {
     let alice = TestPeer::new(0).await;
     let bob = TestPeer::new(1).await;
@@ -372,7 +371,7 @@ async fn send_and_receive_after_add() {
     assert_eq!(events.len(), 1);
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn add_pull_member_to_space() {
     let alice = TestPeer::new(0).await;
     let bob = <TestPeer>::new(1).await;
@@ -467,7 +466,7 @@ async fn add_pull_member_to_space() {
     assert_eq!(vec![message_04.hash()], y.orderer.heads());
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn receive_control_messages() {
     let alice = TestPeer::new(0).await;
     let bob = TestPeer::new(1).await;
@@ -597,7 +596,7 @@ async fn receive_control_messages() {
     assert_eq!(vec![message_05.hash()], y.orderer.heads());
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn remove_member() {
     let alice = TestPeer::new(0).await;
     let bob = TestPeer::new(1).await;
@@ -694,7 +693,7 @@ async fn remove_member() {
     ));
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn concurrent_removal_conflict() {
     let alice = TestPeer::new(0).await;
     let bob = TestPeer::new(1).await;
@@ -808,7 +807,7 @@ async fn concurrent_removal_conflict() {
     ))
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn space_from_existing_auth_state() {
     let alice = TestPeer::new(0).await;
     let bob = <TestPeer>::new(1).await;
@@ -933,7 +932,7 @@ async fn space_from_existing_auth_state() {
     );
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn create_group() {
     let alice = <TestPeer>::new(0).await;
     let bob = <TestPeer>::new(1).await;
@@ -986,7 +985,7 @@ async fn create_group() {
     );
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn add_member_to_group() {
     let alice = <TestPeer>::new(0).await;
     let bob = <TestPeer>::new(1).await;
@@ -1052,7 +1051,7 @@ async fn add_member_to_group() {
     );
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn remove_member_from_group() {
     let alice = <TestPeer>::new(0).await;
     let bob = <TestPeer>::new(1).await;
@@ -1105,7 +1104,7 @@ async fn remove_member_from_group() {
     );
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn receive_auth_messages() {
     let alice = <TestPeer>::new(0).await;
     let bob = <TestPeer>::new(1).await;
@@ -1162,9 +1161,8 @@ async fn receive_auth_messages() {
     );
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn shared_auth_state() {
-    setup_logging();
     let alice = TestPeer::new(0).await;
     let bob = <TestPeer>::new(1).await;
     let claire = <TestPeer>::new(2).await;
@@ -1279,7 +1277,7 @@ async fn shared_auth_state() {
     assert_eq!(expected_members, members);
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn events() {
     let alice = TestPeer::new(0).await;
     let bob = <TestPeer>::new(1).await;
@@ -1446,7 +1444,7 @@ async fn events() {
     assert_eq!(all_bob_events.len(), 12);
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn idempotent_api() {
     let alice = TestPeer::new(0).await;
     let bob = TestPeer::new(1).await;
@@ -1512,7 +1510,7 @@ async fn idempotent_api() {
     assert_eq!(members, vec![(alice_id, Access::manage()),]);
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn repair_space() {
     let alice = TestPeer::new(0).await;
     let bob = <TestPeer>::new(1).await;
@@ -1630,7 +1628,7 @@ async fn repair_space() {
     assert_eq!(members, expected_members);
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn duplicate_auth_state_references() {
     let alice = TestPeer::new(0).await;
     let bob = <TestPeer>::new(1).await;
@@ -1760,7 +1758,7 @@ async fn duplicate_auth_state_references() {
     assert_eq!(members, expected_members);
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn key_store_expired() {
     let peer = TestPeer::new(0).await;
 
@@ -1772,7 +1770,7 @@ async fn key_store_expired() {
     assert!(!peer.manager.key_bundle_expired().await.unwrap());
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn add_expired_member_to_group() {
     let alice = TestPeer::new(0).await;
     let bob = TestPeer::new(1).await;
@@ -1825,7 +1823,7 @@ async fn add_expired_member_to_group() {
     );
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn process_operation_from_expired_member() {
     let alice = TestPeer::new(0).await;
     let bob = TestPeer::new(1).await;
@@ -1885,10 +1883,8 @@ async fn process_operation_from_expired_member() {
     assert!(bob.manager.process_persisted(&messages[1]).await.is_err());
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn publish_process_separation() {
-    setup_logging();
-
     let alice = <TestPeer>::new(0).await;
     let manager = alice.manager.clone();
     let alice_id = manager.id();
@@ -1932,7 +1928,7 @@ async fn publish_process_separation() {
     assert_eq!(members, vec![(alice_id, Access::manage())]);
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn ejected_event() {
     let alice = TestPeer::new(0).await;
     let manager = alice.manager.clone();
@@ -1959,7 +1955,7 @@ async fn ejected_event() {
     assert_matches!(ejected_event, Event::Spaces(SpaceEvent::Ejected { .. }))
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn write_access_error() {
     let alice = TestPeer::new(0).await;
     let alice_manager = alice.manager.clone();
@@ -2003,7 +1999,7 @@ async fn write_access_error() {
     )
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn promote_demote() {
     let alice = TestPeer::new(0).await;
     let bob = <TestPeer>::new(1).await;

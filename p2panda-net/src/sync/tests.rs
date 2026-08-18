@@ -6,8 +6,8 @@ use std::time::Duration;
 
 use futures_channel::mpsc::{self, SendError};
 use futures_util::{Sink, SinkExt, Stream, StreamExt};
-use p2panda_core::Topic;
-use p2panda_core::test_utils::setup_logging;
+use p2panda_core::test_utils::apply;
+use p2panda_core::{Topic, p2panda_test};
 use p2panda_sync::traits::{Manager as SyncManagerTrait, Protocol};
 use p2panda_sync::{FromSync, ToSync};
 use ractor::thread_local::{ThreadLocalActor, ThreadLocalActorSpawner};
@@ -228,10 +228,8 @@ impl SyncManagerTrait<Topic> for DummySyncManager<FailingSyncArgs, FailingSyncPr
     }
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn failed_sync_session_retry() {
-    setup_logging();
-
     let topic = [0; 32].into();
 
     for (alice_behavior, bob_behavior) in [

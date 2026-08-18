@@ -5,8 +5,8 @@ use std::time::Duration;
 
 use futures_test::task::noop_context;
 use futures_util::TryStreamExt;
-use p2panda_core::Topic;
-use p2panda_core::test_utils::setup_logging;
+use p2panda_core::{Topic, p2panda_test};
+use p2panda_core::test_utils::apply;
 use tokio::time::sleep;
 use tokio_stream::StreamExt;
 
@@ -16,9 +16,8 @@ use crate::gossip::{DEFAULT_MAX_MESSAGE_SIZE, Gossip, GossipEvent};
 use crate::iroh_endpoint::Endpoint;
 use crate::test_utils::test_args;
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn joined_and_left_events_are_received() {
-    setup_logging();
     let mut ant_args = test_args();
     let mut bat_args = test_args();
     let topic: Topic = [1; 32].into();
@@ -83,10 +82,8 @@ async fn joined_and_left_events_are_received() {
     std::assert_matches!(events.recv().await, Ok(GossipEvent::Left { .. }));
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn join_without_bootstrap() {
-    setup_logging();
-
     // Scenario:
     //
     // - Ant joins the gossip topic
@@ -198,10 +195,8 @@ async fn join_without_bootstrap() {
     );
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn two_peer_gossip() {
-    setup_logging();
-
     // Scenario:
     //
     // - Ant joins the gossip topic
@@ -280,11 +275,9 @@ async fn two_peer_gossip() {
     assert_eq!(msg, b"oh hey ant!".to_vec());
 }
 
+#[apply(p2panda_test)]
 #[ignore = "flaky"]
-#[tokio::test]
 async fn third_peer_joins_non_bootstrap() {
-    setup_logging();
-
     // Scenario:
     //
     // - Ant joins the gossip topic
@@ -404,10 +397,8 @@ async fn third_peer_joins_non_bootstrap() {
     assert_eq!(msg, ant_msg_to_bat_and_cat);
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn three_peer_gossip_with_rejoin() {
-    setup_logging();
-
     // Scenario:
     //
     // - Ant joins the gossip topic
@@ -578,10 +569,9 @@ async fn three_peer_gossip_with_rejoin() {
     assert_eq!(msg, bat_msg_to_cat);
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn leave_overlay_on_drop() {
     // See issue: https://github.com/p2panda/p2panda/issues/967
-    setup_logging();
 
     // Configure two nodes, ant and bat, which know about one another.
     // Then get a handle to the same gossip topic stream for both.
@@ -721,10 +711,8 @@ async fn leave_overlay_on_drop() {
     assert_eq!(bat_rx.next().await.unwrap().unwrap(), b"test 3".to_vec());
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn large_message_error() {
-    setup_logging();
-
     let args = test_args();
 
     let topic = Topic::random();

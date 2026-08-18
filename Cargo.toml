@@ -25,6 +25,7 @@ futures-channel = { version = "0.3.32" }
 futures-test = { version = "0.3.32" }
 futures-util = { version = "0.3.32", default-features = false }
 hex = { version = "0.4.3" }
+macro_rules_attribute = { version = "0.2.2" }
 mock_instant = { version = "0.6.1" }
 pin-project = { version = "1.1.13" }
 rand = { version = "0.10.1" }

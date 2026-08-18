@@ -242,7 +242,8 @@ mod tests {
 
     use futures_channel::mpsc;
     use futures_util::{SinkExt, StreamExt};
-    use p2panda_core::test_utils::setup_logging;
+    use p2panda_core::p2panda_test;
+    use p2panda_core::test_utils::apply;
     use p2panda_core::{Body, Operation, Topic};
     use p2panda_store::SqliteStore;
 
@@ -251,16 +252,14 @@ mod tests {
     use crate::traits::{Manager, Protocol};
     use crate::{FromSync, SessionConfig, ToSync};
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn from_args() {
         let store = SqliteStore::temporary().await;
         let _: TestTopicSyncManager = Manager::from_args(store);
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn manager_e2e() {
-        setup_logging();
-
         const LOG_ID: TestLogId = 0;
         const SESSION_ID: u64 = 0;
 
@@ -413,10 +412,8 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn live_mode_three_peer_forwarding() {
-        setup_logging();
-
         const LOG_ID: TestLogId = 0;
         const SESSION_AB: u64 = 0;
         const SESSION_AC: u64 = 1;
@@ -596,7 +593,7 @@ mod tests {
         assert!(!operations_c.contains(&peer_c_header_1));
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn non_blocking_manager_stream() {
         const LOG_ID: TestLogId = 0;
         const SESSION_ID: u64 = 0;

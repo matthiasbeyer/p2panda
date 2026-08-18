@@ -5,8 +5,8 @@ use std::collections::HashMap;
 use iroh::Endpoint;
 use iroh::endpoint::{Connection, presets};
 use iroh::protocol::{AcceptError, ProtocolHandler, Router};
-use p2panda_core::test_utils::setup_logging;
-use p2panda_core::{Operation, Topic};
+use p2panda_core::test_utils::apply;
+use p2panda_core::{Operation, Topic, p2panda_test};
 use p2panda_net::codec::{into_codec_sink, into_codec_stream};
 use p2panda_sync::FromSync;
 use p2panda_sync::protocols::{Logs, TopicLogSyncEvent as Event};
@@ -16,10 +16,8 @@ use tokio_stream::StreamExt;
 
 use crate::test_utils::TestNode;
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn e2e_log_sync() {
-    setup_logging();
-
     let topic: Topic = [0; 32].into();
     let log_id = 0;
 
@@ -165,10 +163,8 @@ async fn e2e_log_sync() {
     );
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn e2e_three_party_sync() {
-    setup_logging();
-
     let topic: Topic = [0; 32].into();
     let log_id = 0;
 
@@ -351,10 +347,8 @@ async fn e2e_three_party_sync() {
     );
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn unsubscribe_from_gossip_after_drop() {
-    setup_logging();
-
     let sync_topic: Topic = [0; 32].into();
 
     let alice = TestNode::spawn([73; 32], None).await;
@@ -396,7 +390,7 @@ impl ProtocolHandler for TestProtocol {
     async fn shutdown(&self) {}
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn panic_on_sink_closure_after_error_regression() {
     // This is a regression test for an issue where chaining adaptors on the message sink in
     // TopicLogSync was causing a panic under certain error conditions:
@@ -404,8 +398,6 @@ async fn panic_on_sink_closure_after_error_regression() {
     //
     // The issue could only be reproduced when using an actual QUIC stream as the underlying
     // transport. Here we use a connection between two iroh endpoints.
-    setup_logging();
-
     let topic = Topic::random();
     let mut peer = Peer::new(0).await;
     peer.associate(&topic, &Logs::default()).await;

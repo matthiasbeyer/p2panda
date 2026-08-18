@@ -7,12 +7,107 @@ use tracing_subscriber;
 
 use crate::{Body, Extensions, Hash, Header, Operation, SeqNum, SigningKey, Topic, VerifyingKey};
 
-pub fn setup_logging() {
-    if std::env::var("RUST_LOG").is_ok() {
-        let _ = tracing_subscriber::fmt()
-            .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-            .try_init();
+pub use macro_rules_attribute::apply;
+
+/// Make a function a testing function
+///
+/// With this macro applied to a function, we get
+///
+/// - async functions get put into a tokio runtime
+/// - Logging is automatically enabled based on the `RUST_LOG` env variable, defaults to `debug`
+///
+/// # Example
+///
+/// ```rust
+/// #[p2panda_core::test_utils::apply(p2panda_core::test_utils::p2panda_test)]
+/// fn my_awesome_test() {
+///     // Test body
+/// }
+/// ```
+#[macro_export]
+macro_rules! p2panda_test {
+    (
+        $( #[$attr:meta] )*
+        async fn $name:ident () $(-> $ret:ty)? $body:block
+    ) => {
+        $crate::test_utils::p2panda_test!(@tracing $( #[$attr] )* $name {
+            #[allow(unused)]
+            let ret = $crate::test_utils::p2panda_test!(@add_tokio $body);
+
+            $($crate::test_utils::p2panda_test!(@check_return $ret, ret);)?
+        });
+    };
+
+    (
+        $( #[$attr:meta] )*
+        fn $name:ident () $(-> $ret:ty)? $body:block
+    ) => {
+        $crate::test_utils::p2panda_test!(@tracing $( #[$attr] )* $name {
+            #[allow(unused)]
+            let ret = { $body };
+
+            $($crate::test_utils::p2panda_test!(@check_return $ret, ret);)?
+        });
+    };
+
+    (@add_tokio $body:block) => {
+        {
+            let rt = $crate::test_utils::create_runtime(concat!("test-runtime-", stringify!($name)))
+                .expect("Could not create runtime for tests");
+
+            rt.block_on(async { $body })
+        }
+    };
+
+    (@tracing $( #[$attr:meta] )* $name:ident $body:block) => {
+        #[test]
+        $( #[$attr] )*
+        fn $name() {
+            $crate::test_utils::setup_tracing();
+
+            $body
+        }
+    };
+
+    (@check_return $ret:ty, $value:ident) => {
+        let ret: $ret = $value;
+        let ret: Result<_, _> = ret;
+
+        if let Err(error) = ret {
+            panic!("The test failed: {error:#?}");
+        }
     }
+}
+pub use p2panda_test;
+
+// Use the
+//
+///     #[p2panda_core::test_utils::apply(p2panda_core::test_utils::p2panda_test)]
+///
+/// annotation (see above)
+#[doc(hidden)]
+pub fn setup_tracing() {
+    let _ = tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::builder()
+                .with_default_directive(
+                    "debug".parse().expect("Could not parse built-in EnvFilter"),
+                )
+                .from_env_lossy(),
+        )
+        .with_test_writer()
+        .try_init();
+}
+
+/// Create an async runtime for use with tokio
+///
+/// The `name` argument is used to give the resulting Runtime this name
+#[doc(hidden)]
+pub fn create_runtime(name: &'static str) -> Result<tokio::runtime::Runtime, std::io::Error> {
+    tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .name(name)
+        .build()
 }
 
 #[derive(Clone, Default)]
@@ -85,6 +180,7 @@ mod tests {
     use crate::Header;
     use crate::cbor::{decode_cbor, encode_cbor};
 
+    use super::*;
     use super::TestLog;
 
     #[test]
@@ -94,4 +190,10 @@ mod tests {
         let bytes = encode_cbor(operation.header()).unwrap();
         assert!(decode_cbor::<Header, _>(&bytes[..]).is_ok());
     }
+
+    #[apply(p2panda_test)]
+    fn verify_non_async_test() {}
+
+    #[apply(p2panda_test)]
+    async fn verify_async_test() {}
 }

@@ -33,7 +33,6 @@ use clap::Parser;
 use futures_util::StreamExt;
 use iroh::EndpointAddr;
 use p2panda_core::cbor::{decode_cbor, encode_cbor};
-use p2panda_core::test_utils::setup_logging;
 use p2panda_core::{Body, Hash, Header, Operation, SeqNum, SigningKey, Topic, VerifyingKey};
 use p2panda_net::addrs::NodeInfo;
 use p2panda_net::iroh_mdns::MdnsDiscoveryMode;
@@ -90,7 +89,7 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    setup_logging();
+    p2panda_core::test_utils::setup_tracing();
 
     let args = Args::parse();
 

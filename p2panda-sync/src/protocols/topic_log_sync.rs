@@ -608,7 +608,8 @@ pub mod tests {
 
     use futures_channel::mpsc;
     use futures_util::{SinkExt, StreamExt};
-    use p2panda_core::test_utils::setup_logging;
+    use p2panda_core::p2panda_test;
+    use p2panda_core::test_utils::apply;
     use p2panda_core::{Body, Operation, Topic};
 
     use crate::ToSync;
@@ -618,7 +619,7 @@ pub mod tests {
 
     use super::{TopicLogSyncError, TopicLogSyncEvent};
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn sync_session_no_operations() {
         let topic = Topic::random();
         let mut peer = Peer::new(0).await;
@@ -666,10 +667,8 @@ pub mod tests {
         }
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn sync_operations_accept() {
-        setup_logging();
-
         let log_id = 0;
         let topic = Topic::random();
         let mut peer = Peer::new(0).await;
@@ -776,9 +775,8 @@ pub mod tests {
         }
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn topic_log_sync_full_duplex() {
-        setup_logging();
         let topic = Topic::random();
         let log_id = 0;
 
@@ -863,7 +861,7 @@ pub mod tests {
         );
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn live_mode() {
         let log_id = 0;
         let topic = Topic::random();
@@ -976,7 +974,7 @@ pub mod tests {
         }
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn dedup_live_mode_messages() {
         let log_id = 0;
         let topic = Topic::random();
@@ -1105,7 +1103,7 @@ pub mod tests {
         }
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn unexpected_stream_closure_sync() {
         let topic = Topic::random();
         let mut peer = Peer::new(0).await;
@@ -1151,7 +1149,7 @@ pub mod tests {
         }
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn unexpected_stream_closure_live_mode() {
         let topic = Topic::random();
         let mut peer = Peer::new(0).await;

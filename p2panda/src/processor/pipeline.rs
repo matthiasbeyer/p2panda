@@ -424,9 +424,9 @@ mod tests {
     use std::assert_matches;
     use std::collections::HashSet;
 
-    use p2panda_core::test_utils::{TestLog, setup_logging};
+    use p2panda_core::test_utils::{TestLog, apply};
     use p2panda_core::traits::Digest;
-    use p2panda_core::{Hash, PruneFlag, SigningKey, Topic};
+    use p2panda_core::{Hash, PruneFlag, SigningKey, Topic, p2panda_test};
     use p2panda_spaces::Config;
     use p2panda_store::SqliteStore;
     use p2panda_stream::hooks::ProcessorHooksList;
@@ -441,10 +441,8 @@ mod tests {
 
     use super::{Event, Pipeline};
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn processing_operations() {
-        setup_logging();
-
         let store = SqliteStore::temporary().await;
         let tasks = TaskTracker::new();
         let credentials = Credentials::generate();
@@ -501,10 +499,8 @@ mod tests {
         assert!(result.is_failed());
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn out_of_order() {
-        setup_logging();
-
         let store = SqliteStore::temporary().await;
         let tasks = TaskTracker::new();
         let credentials = Credentials::generate();
@@ -562,10 +558,8 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn buffered_outputs() {
-        setup_logging();
-
         let store = SqliteStore::temporary().await;
         let tasks = TaskTracker::new();
         let credentials = Credentials::generate();

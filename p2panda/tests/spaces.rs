@@ -24,16 +24,15 @@ mod spaces_api {
     use p2panda::spaces::InnerGroupEvent;
     use p2panda::streams::{StreamEvent, SystemEvent};
     use p2panda_auth::AccessLevel;
-    use p2panda_core::test_utils::setup_logging;
+    use p2panda_core::p2panda_test;
+    use p2panda_core::test_utils::apply;
     use p2panda_spaces::SpaceEvent;
     use tokio_stream::StreamExt;
 
     use super::{SecretData, spawn_node};
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn create_space_for_multiple_members() -> Result<(), Box<dyn std::error::Error>> {
-        setup_logging();
-
         let network_id = Topic::random().into();
 
         let panda = spawn_node(network_id).await;
@@ -285,10 +284,8 @@ mod spaces_api {
         Ok(())
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn spaces_sync() -> Result<(), Box<dyn std::error::Error>> {
-        setup_logging();
-
         let network_id = Topic::random().into();
         let topic = Topic::random();
 
@@ -380,16 +377,15 @@ mod spaces_repair_task {
     use p2panda::spaces::InnerGroupEvent;
     use p2panda::streams::{StreamEvent, SystemEvent};
     use p2panda_auth::AccessLevel;
-    use p2panda_core::test_utils::setup_logging;
+    use p2panda_core::p2panda_test;
+    use p2panda_core::test_utils::apply;
     use p2panda_spaces::SpaceEvent;
     use tokio_stream::StreamExt;
 
     use super::{SecretData, spawn_node};
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn sync_repair_space() {
-        setup_logging();
-
         let network_id = Topic::random().into();
         let topic = Topic::random();
 
@@ -468,10 +464,8 @@ mod spaces_repair_task {
         }
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn live_repair_space() {
-        setup_logging();
-
         let network_id = Topic::random().into();
         let topic = Topic::random();
 
@@ -548,16 +542,15 @@ mod spaces_api_validation {
     use p2panda::{SigningKey, Topic};
     use p2panda_auth::AccessLevel;
     use p2panda_auth::validation::{AddMemberError, RemoveMemberError, WriteError};
-    use p2panda_core::test_utils::setup_logging;
+    use p2panda_core::p2panda_test;
+    use p2panda_core::test_utils::apply;
     use p2panda_spaces::SpaceEvent;
     use tokio_stream::StreamExt;
 
     use super::{SecretData, spawn_node};
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn api_validation() {
-        setup_logging();
-
         let network_id = Topic::random().into();
         let topic = Topic::random();
 
@@ -640,15 +633,11 @@ mod spaces_api_validation {
         );
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn groups_api_validation() {
-        setup_logging();
-
-        let network_id = Topic::random().into();
-
-        let panda = spawn_node(network_id).await;
-        let lion = spawn_node(network_id).await;
-        let tiger = spawn_node(network_id).await;
+        let panda = p2panda::spawn().await.unwrap();
+        let lion = p2panda::spawn().await.unwrap();
+        let tiger = p2panda::spawn().await.unwrap();
 
         let topic = Topic::random();
 
@@ -749,15 +738,14 @@ mod spaces_events {
     use p2panda::spaces::{GroupEvent, InnerGroupEvent};
     use p2panda::streams::SystemEvent;
     use p2panda_auth::AccessLevel;
-    use p2panda_core::test_utils::setup_logging;
+    use p2panda_core::p2panda_test;
+    use p2panda_core::test_utils::apply;
     use tokio_stream::StreamExt;
 
     use super::{SecretData, spawn_node};
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn group_events() {
-        setup_logging();
-
         let network_id = Topic::random().into();
 
         let panda = spawn_node(network_id).await;
@@ -917,15 +905,13 @@ mod filtered_messages {
     use std::time::Duration;
 
     use p2panda::streams::StreamEvent;
-    use p2panda_core::test_utils::setup_logging;
+    use p2panda_core::{p2panda_test, test_utils::apply};
     use tokio_stream::StreamExt;
 
     use super::{SecretData, spawn_node};
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn concurrently_removed_members_filtered() {
-        setup_logging();
-
         use p2panda::Topic;
         use p2panda_auth::AccessLevel;
 
@@ -1043,10 +1029,8 @@ mod filtered_messages {
         assert!(penguin_message_filtered);
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn causally_later_removed_members_not_filtered() {
-        setup_logging();
-
         use p2panda::Topic;
         use p2panda_auth::AccessLevel;
 
@@ -1148,7 +1132,7 @@ mod members {
     use p2panda::Topic;
     use p2panda::streams::StreamEvent;
     use p2panda_auth::AccessLevel;
-    use p2panda_core::test_utils::setup_logging;
+    use p2panda_core::{p2panda_test, test_utils::apply};
     use tokio_stream::StreamExt;
 
     use crate::spawn_node;
@@ -1159,10 +1143,8 @@ mod members {
     // Node B needs to inform A & D about the new secret after removing C and needs a key bundle of
     // D to do that. If all member logs are correctly associated, B should have received it
     // indirectly via A.
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn indirect_members_log_sync() {
-        setup_logging();
-
         let network_id = Topic::random().into();
         let topic = Topic::random();
 

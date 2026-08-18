@@ -3,8 +3,8 @@
 use iroh::EndpointAddr;
 use iroh::endpoint::{AfterHandshakeOutcome, BeforeConnectOutcome, Connection, EndpointHooks};
 use iroh::protocol::ProtocolHandler;
-use p2panda_core::VerifyingKey;
-use p2panda_core::test_utils::setup_logging;
+use p2panda_core::{VerifyingKey, p2panda_test};
+use p2panda_core::test_utils::apply;
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 use crate::address_book::AddressBook;
@@ -79,10 +79,8 @@ impl EndpointHooks for TestHook {
     }
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn establish_connection() {
-    setup_logging();
-
     let mut alice_args = test_args();
     let bob_args = test_args();
 

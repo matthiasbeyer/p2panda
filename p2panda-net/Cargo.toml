@@ -96,6 +96,7 @@ tracing-subscriber = { workspace = true, features = ["env-filter"], optional = t
 clap = { version = "4.5.54", features = ["derive"] }
 futures-test = { workspace = true }
 mock_instant = { workspace = true }
+p2panda-core = { workspace = true, default-features = true, features = ["test_utils"] }
 p2panda-discovery = { workspace = true, default-features = true, features = ["test_utils"] }
 p2panda-net = { path = ".", features = ["test_utils"] }
 p2panda-store = { workspace = true, default-features = true, features = ["test_utils"] }

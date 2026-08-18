@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use p2panda_core::test_utils::setup_logging;
+use p2panda_core::p2panda_test;
+use p2panda_core::test_utils::apply;
 
 use crate::address_book::AddressBook;
 use crate::iroh_endpoint::Endpoint;
 use crate::iroh_mdns::{MdnsDiscovery, MdnsDiscoveryMode};
 use crate::test_utils::test_args_from_seed;
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn mdns_discovery() {
-    setup_logging();
-
     let alice_args = test_args_from_seed([100; 32]);
     let bob_args = test_args_from_seed([200; 32]);
 

@@ -31,13 +31,14 @@ mod api {
     use p2panda::streams::{EphemeralMessage, ProcessedOperation, StreamEvent, SystemEvent};
     use p2panda::{Credentials, Topic};
     use p2panda_core::cbor::encode_cbor;
-    use p2panda_core::test_utils::{TestLog, setup_logging};
+    use p2panda_core::p2panda_test;
+    use p2panda_core::test_utils::{TestLog, apply};
     use p2panda_net::discovery::DiscoveryEvent;
     use p2panda_store::logs::LogStore;
     use tokio::task::JoinHandle;
     use tokio_stream::StreamExt;
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn build_and_spawn() -> Result<(), Box<dyn std::error::Error>> {
         // Default & instant setup.
         let _node = p2panda::spawn().await?;
@@ -52,7 +53,7 @@ mod api {
         Ok(())
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn ephemeral_stream() {
         let chat_id = Topic::random();
 
@@ -98,10 +99,8 @@ mod api {
         assert!(icebears_received_msg.timestamp() < pandas_received_msg.timestamp())
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn eventually_consistent_stream() {
-        setup_logging();
-
         let chat_id = Topic::random();
 
         let panda = p2panda::builder().spawn().await.unwrap();
@@ -128,10 +127,8 @@ mod api {
         assert_eq!(received.author(), panda.id());
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn event_stream() {
-        setup_logging();
-
         let chat_id = Topic::random();
 
         let panda = p2panda::builder().spawn().await.unwrap();
@@ -160,10 +157,8 @@ mod api {
         assert!(received_event);
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn log_prefix_pruning() {
-        setup_logging();
-
         let topic = Topic::random();
 
         let panda = p2panda::builder().spawn().await.unwrap();
@@ -225,10 +220,8 @@ mod api {
         assert_eq!(icebear_result.iter().count(), 1);
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn import_external_stream() {
-        setup_logging();
-
         let chat_id = Topic::random();
 
         // Panda opens their app and publishes some messages into a chat.
@@ -323,16 +316,14 @@ mod event_replays {
     use p2panda::operation::LogId;
     use p2panda::streams::{StreamEvent, StreamFrom};
     use p2panda_core::logs::LogHeights;
-    use p2panda_core::test_utils::setup_logging;
-    use p2panda_core::{Cursor, Topic};
+    use p2panda_core::test_utils::apply;
+    use p2panda_core::{Cursor, Topic, p2panda_test};
     use tokio_stream::StreamExt;
 
     use super::{assert_message_id, assert_replay_ended, assert_replay_started};
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn automatic_acking() {
-        setup_logging();
-
         let topic = Topic::random();
         let node = p2panda::builder().spawn().await.unwrap();
 
@@ -369,10 +360,8 @@ mod event_replays {
         assert_message_id(&rx.next().await.unwrap(), message_id_3);
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn explicit_acking() {
-        setup_logging();
-
         let topic = Topic::random();
         let node = p2panda::builder()
             .ack_policy(AckPolicy::Explicit)
@@ -419,10 +408,8 @@ mod event_replays {
         assert_replay_ended(&rx.next().await.unwrap());
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn replay_stream_from_start() {
-        setup_logging();
-
         let chat_id = Topic::random();
 
         let panda = p2panda::builder().spawn().await.unwrap();
@@ -462,10 +449,8 @@ mod event_replays {
         assert_eq!(received[1].message(), &"Hello, Panda!".to_string());
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn replay_stream_from_cursor() {
-        setup_logging();
-
         let topic = Topic::random();
         let node = p2panda::builder().spawn().await.unwrap();
 
@@ -521,13 +506,14 @@ mod shutdown {
 
     use p2panda::Topic;
     use p2panda::streams::StreamEvent;
-    use p2panda_core::test_utils::setup_logging;
+    use p2panda_core::{
+        p2panda_test,
+        test_utils::apply,
+    };
     use tokio_stream::StreamExt;
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn sync_is_closed_on_drop() {
-        setup_logging();
-
         let chat_id = Topic::random();
 
         let panda = p2panda::builder().spawn().await.unwrap();
@@ -573,10 +559,8 @@ mod shutdown {
         assert!(sync_started_again);
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn graceful_closure_of_publisher() {
-        setup_logging();
-
         let chat_id = Topic::random();
 
         let panda = p2panda::builder().spawn().await.unwrap();
@@ -629,14 +613,15 @@ mod shutdown {
 mod connection_authorisation {
     use p2panda::Topic;
     use p2panda::streams::SystemEvent;
-    use p2panda_core::test_utils::setup_logging;
+    use p2panda_core::{
+        p2panda_test,
+        test_utils::apply,
+    };
     use p2panda_net::connection_authoriser::ConnectionAuthoriserEvent;
     use tokio_stream::StreamExt;
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn block_node_connections() {
-        setup_logging();
-
         let chat_id = Topic::random();
 
         let panda = p2panda::builder().spawn().await.unwrap();
@@ -677,10 +662,8 @@ mod connection_authorisation {
         assert!(received_event);
     }
 
-    #[tokio::test]
+    #[apply(p2panda_test)]
     async fn block_node_connections_for_topic() {
-        setup_logging();
-
         let chat_id = Topic::random();
 
         let panda = p2panda::builder().spawn().await.unwrap();

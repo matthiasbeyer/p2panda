@@ -2,7 +2,8 @@
 
 use std::sync::Arc;
 
-use p2panda_core::test_utils::setup_logging;
+use p2panda_core::p2panda_test;
+use p2panda_core::test_utils::apply;
 use ractor::concurrency::Duration;
 use ractor::thread_local::ThreadLocalActor;
 use ractor::{ActorRef, RpcReplyPort, call};
@@ -107,10 +108,8 @@ impl ThreadLocalActor for TestActor {
     }
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn restart_after_failure() {
-    setup_logging();
-
     let supervisor = Supervisor::builder()
         .strategy(RestartStrategy::OneForOne)
         .spawn()
@@ -132,10 +131,8 @@ async fn restart_after_failure() {
     assert_eq!(test.echo(27).await, 27);
 }
 
-#[tokio::test]
+#[apply(p2panda_test)]
 async fn nested_supervisors() {
-    setup_logging();
-
     let root_supervisor = Supervisor::builder().spawn().await.unwrap();
 
     let child_supervisor = Supervisor::builder()

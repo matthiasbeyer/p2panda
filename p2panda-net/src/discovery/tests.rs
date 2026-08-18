@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use p2panda_core::test_utils::setup_logging;
 use tokio::task::JoinHandle;
 
 use crate::discovery::{DiscoveryEvent, SessionRole};
@@ -23,10 +22,8 @@ async fn session_ended_handle(node: &TestNode) -> JoinHandle<()> {
     })
 }
 
-#[tokio::test]
+#[p2panda_core::test_utils::apply(p2panda_core::test_utils::p2panda_test)]
 async fn smoke_test() {
-    setup_logging();
-
     // Spawn nodes.
     //
     // Bob's address book is empty.
