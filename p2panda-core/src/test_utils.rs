@@ -26,11 +26,24 @@ pub use macro_rules_attribute::apply;
 /// ```
 #[macro_export]
 macro_rules! p2panda_test {
+
+    // Entry point for async fn tests
     (
         $( #[$attr:meta] )*
-        async fn $name:ident () $(-> $ret:ty)? $body:block
+        async fn $name:ident
+            (
+                $( $generator_variable:ident : $generator_type:ty ),* $(,)?
+            )
+            $(-> $ret:ty)?
+            $body:block
     ) => {
-        $crate::test_utils::p2panda_test!(@tracing $( #[$attr] )* $name {
+        $crate::test_utils::p2panda_test!(@tracing
+            $( #[$attr] )*
+            $name
+            (
+                $( $generator_variable : $generator_type ),*
+            )
+        {
             #[allow(unused)]
             let ret = $crate::test_utils::p2panda_test!(@add_tokio $body);
 
@@ -38,11 +51,21 @@ macro_rules! p2panda_test {
         });
     };
 
+    // Entry point for non-async fn tests
     (
         $( #[$attr:meta] )*
-        fn $name:ident () $(-> $ret:ty)? $body:block
+        fn $name:ident
+            (
+                $( $generator_variable:ident : $generator_type:ty ),* $(,)?
+            )
+            $(-> $ret:ty)?
+            $body:block
     ) => {
-        $crate::test_utils::p2panda_test!(@tracing $( #[$attr] )* $name {
+        $crate::test_utils::p2panda_test!(@tracing $( #[$attr] )* $name
+            (
+                $( $generator_variable : $generator_type ),*
+            )
+        {
             #[allow(unused)]
             let ret = { $body };
 
@@ -50,6 +73,10 @@ macro_rules! p2panda_test {
         });
     };
 
+
+    // utilities
+
+    // Add tokio runtime around body
     (@add_tokio $body:block) => {
         {
             let rt = $crate::test_utils::create_runtime(concat!("test-runtime-", stringify!($name)))
@@ -59,16 +86,29 @@ macro_rules! p2panda_test {
         }
     };
 
-    (@tracing $( #[$attr:meta] )* $name:ident $body:block) => {
+    // Add tracing setup around body
+    (@tracing
+        $( #[$attr:meta] )*
+        $name:ident
+        (
+                $( $generator_variable:ident : $generator_type:ty ),* $(,)?
+        )
+        $body:block
+    ) => {
         #[test]
         $( #[$attr] )*
         fn $name() {
             $crate::test_utils::setup_tracing();
 
+            $(
+                let $generator_variable = <$generator_type as $crate::test_utils::Generatable>::generate();
+            )*
+
             $body
         }
     };
 
+    // Check the return value of the body
     (@check_return $ret:ty, $value:ident) => {
         let ret: $ret = $value;
         let ret: Result<_, _> = ret;
@@ -175,6 +215,18 @@ impl TestLog {
     }
 }
 
+pub trait Generatable {
+    fn generate() -> Self;
+}
+
+pub struct RandomTopic(pub Topic);
+
+impl Generatable for RandomTopic {
+    fn generate() -> Self {
+        RandomTopic(Topic::random())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::Header;
@@ -196,4 +248,14 @@ mod tests {
 
     #[apply(p2panda_test)]
     async fn verify_async_test() {}
+
+    #[apply(p2panda_test)]
+    fn verify_extracting_random_topic(topic: RandomTopic) {
+        let _ = topic;
+    }
+
+    #[apply(p2panda_test)]
+    async fn verify_async_extracting_random_topic(topic: RandomTopic) {
+        let _ = topic;
+    }
 }
