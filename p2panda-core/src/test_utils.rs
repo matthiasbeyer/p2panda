@@ -19,7 +19,10 @@ pub use macro_rules_attribute::apply;
 /// # Example
 ///
 /// ```rust
-/// #[p2panda_core::test_utils::apply(p2panda_core::test_utils::p2panda_test)]
+/// use p2panda_core::test_utils::apply;
+/// use p2panda_core::p2panda_test;
+///
+/// #[apply(p2panda_test)]
 /// fn my_awesome_test() {
 ///     // Test body
 /// }
