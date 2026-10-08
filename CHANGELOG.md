@@ -9,6 +9,12 @@ Highlights are marked with a pancake 🥞
 
 ## [Unreleased]
 
+## [0.7.2] - 08/10/2026
+
+### Fixed
+
+- store: Use `BEGIN IMMEDIATE` in database transaction to allow awaiting busy write locks across processes [#1502](https://github.com/p2panda/p2panda/pull/1502)
+
 ## [0.7.1] - 21/08/2026
 
 ### Added
