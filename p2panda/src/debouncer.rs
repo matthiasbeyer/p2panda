@@ -8,13 +8,13 @@ use tokio::time::Instant;
 ///
 /// After at least one trigger arrived, this is the duration after which the task will be executed
 /// if no further triggers arrive.
-const DEFAULT_QUIET_PERIOD_MS: u64 = 200;
+const DEFAULT_QUIET_PERIOD: Duration = Duration::from_millis(200);
 
 /// Default throttle duration in seconds.
 ///
 /// In the case of events continuously arriving at a rate > quiet_period the task will still be
 /// executed after throttle time has been reached.
-const DEFAULT_MAX_WAIT_SECS: u64 = 1;
+const DEFAULT_MAX_WAIT: Duration = Duration::from_secs(1);
 
 /// Debouncer with throttle for batching triggers which arrive in "bursts" up to a throttle
 /// duration.
@@ -42,8 +42,8 @@ struct Deadlines {
 impl Default for Debouncer {
     fn default() -> Self {
         Self {
-            quiet_period: Duration::from_millis(DEFAULT_QUIET_PERIOD_MS),
-            throttle: Duration::from_secs(DEFAULT_MAX_WAIT_SECS),
+            quiet_period: DEFAULT_QUIET_PERIOD,
+            throttle: DEFAULT_MAX_WAIT,
             pending: Default::default(),
         }
     }
